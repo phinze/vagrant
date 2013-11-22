@@ -185,6 +185,20 @@ module VagrantPlugins
         def read_guest_additions_version
         end
 
+        # Returns the value of a guest property on the current VM.
+        #
+        # @param  [String] property the name of the guest property to read
+        # @return [String] value of the guest property
+        # @raise  [VirtualBoxGuestPropertyNotFound] if the guest property does not have a value
+        def read_guest_property(uuid, property)
+          output = execute("guestproperty", "get", uuid, property)
+          if output =~ /^Value: (.+?)$/
+            $1.to_s
+          else
+            raise Vagrant::Errors::VirtualBoxGuestPropertyNotFound, :guest_property => property
+          end
+        end
+
         # Returns a list of available host only interfaces.
         #
         # @return [Hash]
@@ -292,7 +306,7 @@ module VagrantPlugins
           retryable(:on => Vagrant::Errors::VBoxManageError, :tries => tries, :sleep => 1) do
             # If there is an error with VBoxManage, this gets set to true
             errored = false
-            
+
             # Execute the command
             r = raw(*command, &block)
 
@@ -327,7 +341,7 @@ module VagrantPlugins
                 errored = true
               end
             end
-            
+
             # If there was an error running VBoxManage, show the error and the
             # output.
             if errored

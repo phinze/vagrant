@@ -298,6 +298,10 @@ module VagrantPlugins
           return nil
         end
 
+        def read_guest_ip(adapter_number)
+          read_guest_property(@uuid, "/VirtualBox/GuestInfo/Net/#{adapter_number}/V4/IP")
+        end
+
         def read_host_only_interfaces
           dhcp = {}
           execute("list", "dhcpservers", :retryable => true).split("\n\n").each do |block|
