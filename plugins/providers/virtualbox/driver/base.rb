@@ -190,13 +190,7 @@ module VagrantPlugins
         # @param  [String] property the name of the guest property to read
         # @return [String] value of the guest property
         # @raise  [VirtualBoxGuestPropertyNotFound] if the guest property does not have a value
-        def read_guest_property(uuid, property)
-          output = execute("guestproperty", "get", uuid, property)
-          if output =~ /^Value: (.+?)$/
-            $1.to_s
-          else
-            raise Vagrant::Errors::VirtualBoxGuestPropertyNotFound, :guest_property => property
-          end
+        def read_guest_property(property)
         end
 
         # Returns a list of available host only interfaces.

@@ -299,7 +299,16 @@ module VagrantPlugins
         end
 
         def read_guest_ip(adapter_number)
-          read_guest_property(@uuid, "/VirtualBox/GuestInfo/Net/#{adapter_number}/V4/IP")
+          read_guest_property("/VirtualBox/GuestInfo/Net/#{adapter_number}/V4/IP")
+        end
+
+        def read_guest_property(property)
+          output = execute("guestproperty", "get", @uuid, property)
+          if output =~ /^Value: (.+?)$/
+            $1.to_s
+          else
+            raise Vagrant::Errors::VirtualBoxGuestPropertyNotFound, :guest_property => property
+          end
         end
 
         def read_host_only_interfaces

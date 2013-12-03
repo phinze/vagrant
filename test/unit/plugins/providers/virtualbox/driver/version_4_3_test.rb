@@ -1,10 +1,9 @@
 require_relative "../base"
 
 describe VagrantPlugins::ProviderVirtualBox::Driver::Version_4_3 do
-  my_uuid = '1234-abcd-5678-efgh'
+  include_context "virtualbox"
+  let(:vbox_version) { "4.3.0" }
+  subject { VagrantPlugins::ProviderVirtualBox::Driver::Meta.new(uuid) }
 
-  let(:uuid) { my_uuid }
-  subject { described_class.new(uuid) }
-
-  it_behaves_like "a version 4.x virtualbox driver", uuid: my_uuid
+  it_behaves_like "a version 4.x virtualbox driver"
 end
