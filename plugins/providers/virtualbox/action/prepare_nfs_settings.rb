@@ -21,7 +21,7 @@ module VagrantPlugins
 
         # We're using NFS if we have any synced folder with NFS configured. If
         # we are not using NFS we don't need to do the extra work to
-        # populate these fields.
+        # populate these fields in the environment.
         def using_nfs?
           @machine.config.vm.synced_folders.any? { |_, opts| opts[:type] == :nfs }
         end
@@ -33,9 +33,10 @@ module VagrantPlugins
         # The ! indicates that this method modifies its argument.
         def add_nfs_settings_to_env!(env)
           adapter, host_ip = find_host_only_adapter
-          machine_ip       = adapter && read_machine_ip(adapter)
+          machine_ip       = nil
+          machine_ip       = read_machine_ip(adapter) if adapter
 
-          raise Vagrant::Errors::NFSNoHostonlyNetwork if !(host_ip && machine_ip)
+          raise Vagrant::Errors::NFSNoHostonlyNetwork if !host_ip || !machine_ip
 
           env[:nfs_host_ip]    = host_ip
           env[:nfs_machine_ip] = machine_ip
@@ -74,7 +75,7 @@ module VagrantPlugins
 
           # we need to wait for the guest's IP to show up as a guest property.
           # retry thresholds are relatively high since we might need to wait
-          # for DHCP, but even static IPs take a second or two to appear.
+          # for DHCP, but even static IPs can take a second or two to appear.
           retryable(retry_options.merge(on: Vagrant::Errors::VirtualBoxGuestPropertyNotFound)) do
             @machine.provider.driver.read_guest_ip(guestproperty_adapter)
           end
