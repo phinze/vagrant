@@ -87,7 +87,7 @@ describe VagrantPlugins::ProviderVirtualBox::Action::PrepareNFSSettings do
       ]
       driver.stub(:read_guest_ip) { raise_then_return.shift.call }
 
-      # override sleep to 0 so test does not take a full second
+      # override sleep to 0 so test does not take seconds
       retry_options = subject.retry_options
       subject.stub(:retry_options).and_return(retry_options.merge(sleep: 0))
 
@@ -95,6 +95,27 @@ describe VagrantPlugins::ProviderVirtualBox::Action::PrepareNFSSettings do
 
       env[:nfs_host_ip].should    == "1.2.3.4"
       env[:nfs_machine_ip].should == "2.3.4.5"
+    end
+
+    it "raises an error informing the user of a bug when the guest IP cannot be found" do
+      adapter_number = 2
+      adapter_name   = "vmnet2"
+      driver.stub(:read_network_interfaces).and_return({
+        adapter_number => {type: :hostonly, hostonly: adapter_name}
+      })
+      driver.stub(:read_host_only_interfaces).and_return([
+        {name: adapter_name, ip: "1.2.3.4"}
+      ])
+      driver.stub(:read_guest_ip) {
+        raise Vagrant::Errors::VirtualBoxGuestPropertyNotFound, :guest_property => 'stub'
+      }
+
+      # override sleep to 0 so test does not take seconds
+      retry_options = subject.retry_options
+      subject.stub(:retry_options).and_return(retry_options.merge(sleep: 0))
+
+      expect { subject.call(env) }.
+        to raise_error(Vagrant::Errors::NFSNoGuestIP)
     end
   end
 end

@@ -78,6 +78,10 @@ module VagrantPlugins
           retryable(retry_options.merge(on: Vagrant::Errors::VirtualBoxGuestPropertyNotFound)) do
             @machine.provider.driver.read_guest_ip(guestproperty_adapter)
           end
+        rescue Vagrant::Errors::VirtualBoxGuestPropertyNotFound
+          # this error is more specific with a better error message directing
+          # the user towards the fact that it's probably a reportable bug
+          raise Vagrant::Errors::NFSNoGuestIP
         end
 
         # Separating these out so we can stub out the sleep in tests
