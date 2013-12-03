@@ -648,6 +648,7 @@ en:
       virtualbox_guest_property_not_found: |-
         Could not find a required VirtualBox guest property:
           %{guest_property}
+        This is an internal error that should be reported as a bug.
       virtualbox_invalid_version: |-
         Vagrant has detected that you have a version of VirtualBox installed
         that is not supported. Please install one of the supported versions
